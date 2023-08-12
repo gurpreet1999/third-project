@@ -3,6 +3,10 @@ import "./MovieUpload.css"
 
 const MovieUpload = () => {
 
+const [totalSizeInMB,setTotalSize]=useState(0)
+const [uploadedSizeInMb,setUploadedSizeInMb]=useState(0)
+const [uploadProgress,setUploadProgress]=useState(0)
+
 const buttonRef=useRef(null)
 const [url,seturl]=useState('')
     const [selectedFile, setSelectedFile] = useState(null);
@@ -11,6 +15,9 @@ const [url,seturl]=useState('')
      const [isCompleted,setIsCompleted]=useState(false)
      const handleFileChange = (event) => {
        setSelectedFile(event.target.files[0]);
+       console.log("here",event.target.files[0].size)
+       setTotalSize(event.target.files[0].size / (1024 * 1024))
+      
 
 
      };
@@ -67,7 +74,14 @@ useEffect(()=>{
        const responseData = await response.json();
        console.log(responseData);
    
-       
+       let chunksize=5 * 1024 * 1024;
+      let currentUploadInMb=(partNumber*chunksize) / (1024 * 1024)
+      setUploadedSizeInMb(currentUploadInMb);
+   console.log(currentUploadInMb,totalSizeInMB)
+      const newProgress = (currentUploadInMb / totalSizeInMB) * 100;
+      console.log('new progress',newProgress)
+      setUploadProgress(newProgress)
+
        setUploadedParts((prev)=>[...prev,{PartNumber:partNumber,ETag:responseData.message.ETag}])
        return responseData.message.ETag;
      };
@@ -160,8 +174,8 @@ const handleInputOpen=()=>{
 
   {uploadProgress < 100 ? (
   <div className="progress-bar"   >
-    <div className="progress" style={{ width: `${uploadProgress}%` }}></div>
-    <p>{`Uploading... ${uploadedSizeInMB.toFixed(2)}MB / ${totalSizeInMB.toFixed(2)}MB`}</p>
+    <div className="progress" style={{ width: `${uploadProgress}%` }}>{uploadProgress.toFixed(2)}%</div>
+    <p>{`Uploading... ${uploadedSizeInMb.toFixed(2)}MB / ${totalSizeInMB.toFixed(2)}MB`}</p>
   </div>
 ) : (
   <p>Upload completed!</p>

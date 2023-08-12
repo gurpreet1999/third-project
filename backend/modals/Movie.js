@@ -2,10 +2,7 @@ const mongoose = require("mongoose");
 
 const MovieSchema = new mongoose.Schema({
 
-key:{
-    type:String
-},
-location:{
+url:{
     type:String
 }
 

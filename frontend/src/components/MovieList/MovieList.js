@@ -1,21 +1,22 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import "./MovieList.css"
 
 const MovieList = () => {
 
+  const [movie,setMovie]=useState('')
+
     const fetchMovie=async()=>{
 
-     const data=   await fetch('http://localhost:5000/api/all-movie/2023-06-25 20-13-17.mkv',{
-            method:"GET"
-        })
+     const data=await fetch('http://localhost:5000/api/get-all-movie')
 
         const response=await data.json()
         console.log(response)
+        setMovie(response.movies)
     }
 
 
     useEffect(()=>{
-  
+      fetchMovie()
     },[])
 
 const deleteMovieFromS3=async()=>{
@@ -28,10 +29,10 @@ const response=await data.json()
 console.log(response)
 
 }
-
+console.log(movie)
   return (
     <>
-
+   <div></div>
     <button onClick={deleteMovieFromS3}  >
         delete
     </button>

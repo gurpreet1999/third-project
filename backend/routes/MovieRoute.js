@@ -6,7 +6,7 @@ const upload = multer();
 
 const router = require("express").Router();
 
-router.get('all-movie',getAllMovie)
+router.get('/get-all-movie',getAllMovie)
 
 router.post('/start-upload',startUploadChunk)
 

@@ -2,20 +2,20 @@
 
 const { S3Client, CreateMultipartUploadCommand,UploadPartCommand , CompleteMultipartUploadCommand, DeleteObjectCommand} = require('@aws-sdk/client-s3');
 const {CloudFrontClient,CreateInvalidationCommand} =require("@aws-sdk/client-cloudfront")
-const MOVIE = require('../modals/Movie');
+const MOVIE = require('../modals/Movie.js');
 
 
 const cloudFront=new CloudFrontClient({
   credentials:{
-    accessKeyId: 'AKIA5GO3BLBSZHSU4QFU',
-    secretAccessKey:'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'
+    accessKeyId:process.env.ACCESS_KEY_ID,
+    secretAccessKey:process.env.SECRET_ACCESS_KEY
   }
 })
 const config = {
-    region:'ap-south-1' ,
+    region:process.env.REGION,
     credentials: {
-        accessKeyId: 'AKIA5GO3BLBSZHSU4QFU',
-        secretAccessKey:'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'
+      accessKeyId:process.env.ACCESS_KEY_ID,
+      secretAccessKey:process.env.SECRET_ACCESS_KEY
     }
   }
 
@@ -26,7 +26,7 @@ const startUploadChunk=async(req,res)=>{
     try{
         const s3 = new S3Client(config);
         const params = {
-            Bucket: 'gurpreet-netflix',
+            Bucket:process.env.BUCKET,
             Key: req.body.key,
             ContentType: req.body.contentType,
           };
@@ -51,7 +51,7 @@ const uploadSingleChunkOneByOne=async(req,res)=>{
     
         // Prepare the parameters for uploading a part
         const params = {
-          Bucket: 'gurpreet-netflix',
+          Bucket:process.env.BUCKET,
           Key: req.body.key,
           PartNumber: req.body.partNumber,
           UploadId: req.body.uploadId,
@@ -81,7 +81,7 @@ const completeUploadAndAssembleChunk=async(req,res)=>{
         // Extract relevant data from the request body
         const { parts, key, uploadId } = req.body;
         const params = {
-            Bucket: 'gurpreet-netflix',
+          Bucket:process.env.BUCKET,
             Key: key,
             MultipartUpload: {
               Parts: parts,
@@ -91,8 +91,14 @@ const completeUploadAndAssembleChunk=async(req,res)=>{
 
           const data = await s3.send(new CompleteMultipartUploadCommand(params));
           const image=data.Key
-          const url=`https://d1jdpjq1rnefan.cloudfront.net/${image}`
-          return res.status(200).json({ url});
+          const url=`https://d1jdpjq1rnefan.cloudfront.net/${image}`;
+
+
+           let movieurl= await MOVIE.create({
+                     url:url
+           })
+
+          return res.status(200).json({movieurl});
 
     
     }
@@ -117,14 +123,14 @@ const deleteS3ResourceFromBucket=async(req,res)=>{
     console.log(key)
         // Prepare parameters for deleting the S3 object
         const params = {
-          Bucket: 'gurpreet-netflix',
+          Bucket:process.env.BUCKET,
           Key:key
         };
     
         // Delete the S3 object
         await s3.send(new DeleteObjectCommand(params));
         const invalidationParams={
-          DistributionId:'EU6E9GMOYWKDG',
+          DistributionId:process.env.DISTRIBUTIONID,
           InvalidationBatch:{
             CallerReference:key
           },
