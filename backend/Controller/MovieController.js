@@ -1,6 +1,6 @@
 
-
-const { S3Client, CreateMultipartUploadCommand,UploadPartCommand , CompleteMultipartUploadCommand, DeleteObjectCommand} = require('@aws-sdk/client-s3');
+require('dotenv').config();
+const { S3Client, CreateMultipartUploadCommand,UploadPartCommand , CompleteMultipartUploadCommand, DeleteObjectCommand, HeadObjectCommand} = require('@aws-sdk/client-s3');
 const {CloudFrontClient,CreateInvalidationCommand} =require("@aws-sdk/client-cloudfront")
 const MOVIE = require('../modals/Movie.js');
 
@@ -27,8 +27,8 @@ const startUploadChunk=async(req,res)=>{
         const s3 = new S3Client(config);
         const params = {
             Bucket:process.env.BUCKET,
-            Key: req.body.key,
-            ContentType: req.body.contentType,
+            Key:req.body.key,
+            ContentType:req.body.contentType,
           };
         const data = await s3.send(new CreateMultipartUploadCommand(params));
         return res.status(200).json({ uploadId: data.UploadId });
@@ -90,12 +90,26 @@ const completeUploadAndAssembleChunk=async(req,res)=>{
           };
 
           const data = await s3.send(new CompleteMultipartUploadCommand(params));
+
+         
+
+          const nameOfFile=data.Key
+          const headObjectCommand = new HeadObjectCommand({
+            Bucket:process.env.BUCKET,
+            Key:nameOfFile
+          });
+        const size=  await  s3.send(headObjectCommand)
+      
+
           const image=data.Key
           const url=`https://d1jdpjq1rnefan.cloudfront.net/${image}`;
 
 
            let movieurl= await MOVIE.create({
-                     url:url
+                     url:url,
+                     name:nameOfFile,
+                     size:size.ContentLength
+
            })
 
           return res.status(200).json({movieurl});
@@ -167,6 +181,19 @@ const getAllMovie=async(req,res)=>{
 
 }
 
-module.exports={getAllMovie,startUploadChunk,uploadSingleChunkOneByOne,completeUploadAndAssembleChunk,deleteS3ResourceFromBucket}
+const fetchMovieDetail=async(req,res)=>{
+
+  try {
+    const id=req.params.id
+      const data = await MOVIE.findById(id);
+      res.json({ movies: data });
+  } catch (error) {
+      console.error('Error fetching movies:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+
+}
+
+module.exports={fetchMovieDetail,getAllMovie,startUploadChunk,uploadSingleChunkOneByOne,completeUploadAndAssembleChunk,deleteS3ResourceFromBucket}
 
 

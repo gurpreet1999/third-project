@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import "./MovieList.css"
+import { Link } from 'react-router-dom'
+import "./MovieList.css"
 
 const MovieList = () => {
 
@@ -29,13 +31,35 @@ const response=await data.json()
 console.log(response)
 
 }
+
+const converToMb=(size)=>{
+return size/(1024*1024)
+}
 console.log(movie)
   return (
     <>
-   <div></div>
-    <button onClick={deleteMovieFromS3}  >
-        delete
-    </button>
+{
+  movie && movie.map((item)=>{
+    return (
+      <section class="uploaded-area">
+      <Link to={`/watch/${item._id}`}>
+       <li class="row">
+      <div class="content upload">
+        <i class="fas fa-file-alt"></i>
+        <div class="details">
+          <span class="name">{item?.name} • Uploaded</span>
+          <span class="size">{converToMb(item?.size).toFixed(2)} Mb</span>
+        </div>
+      </div>
+      <i class="fas fa-check"></i>
+    </li>
+    </Link> 
+    </section>
+    )
+  })
+}
+
+ 
     </>
   )
 }

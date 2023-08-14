@@ -3,7 +3,16 @@ const mongoose = require("mongoose");
 const MovieSchema = new mongoose.Schema({
 
 url:{
-    type:String
+    type:String,
+    default:""
+},
+name:{
+    type:String,
+    default:""
+},
+size:{
+    type:String,
+    default:""
 }
 
 

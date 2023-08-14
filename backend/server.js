@@ -6,7 +6,7 @@ const movieRoute=require("./routes/MovieRoute")
 const bodyParser = require('body-parser');
 const cors=require('cors')
 
-
+console.log(process.env)
 mongoose
   .connect("mongodb+srv://gurpreetsingh:Shalu%401999@cluster0.apn6ahn.mongodb.net/?retryWrites=true&w=majority")
   .then(() => console.log("DB Connection Successfull"))
@@ -24,6 +24,6 @@ mongoose
 app.use("/api",movieRoute );
 
 
-app.listen(5000, () => {
-    console.log("Backend server is running!");
+app.listen(process.env.PORT, () => {
+    console.log(`Backend server is running AT ${process.env.PORT}`);
   });

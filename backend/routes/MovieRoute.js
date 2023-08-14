@@ -1,4 +1,4 @@
-const {  startUploadChunk, uploadSingleChunkOneByOne, completeUploadAndAssembleChunk, deleteS3ResourceFromBucket, getAllMovie } = require("../Controller/MovieController");
+const {  startUploadChunk, uploadSingleChunkOneByOne, completeUploadAndAssembleChunk, deleteS3ResourceFromBucket, getAllMovie, fetchMovieDetail } = require("../Controller/MovieController");
 const multer = require('multer');
 const upload = multer();
 
@@ -7,7 +7,7 @@ const upload = multer();
 const router = require("express").Router();
 
 router.get('/get-all-movie',getAllMovie)
-
+router.get('/movie/:id',fetchMovieDetail)
 router.post('/start-upload',startUploadChunk)
 
 router.post('/upload-part',upload.single('data'),uploadSingleChunkOneByOne)
